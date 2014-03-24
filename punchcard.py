@@ -1,6 +1,7 @@
 from math import pi, sin
 import csv
 import cairo
+import argparse
 
 PADDING = 12
 CELL_PADDING = 4
@@ -19,12 +20,14 @@ TITLE_FONT_BOLD = True
 
 DIAGONAL_COLUMN_LABELS = False
 
+
 def set_font(dc, name=None, size=None, bold=False):
     if name is not None:
         weight = cairo.FONT_WEIGHT_BOLD if bold else cairo.FONT_WEIGHT_NORMAL
         dc.select_font_face(name, cairo.FONT_SLANT_NORMAL, weight)
     if size is not None:
         dc.set_font_size(size)
+
 
 def punchcard(path, rows, cols, data, **kwargs):
     # get options
@@ -138,6 +141,7 @@ def punchcard(path, rows, cols, data, **kwargs):
         dc.show_text(title)
     surface.write_to_png(path)
 
+
 def punchcard_from_csv(csv_path, path, **kwargs):
     with open(csv_path, 'rb') as fp:
         reader = csv.reader(fp)
@@ -157,11 +161,13 @@ def punchcard_from_csv(csv_path, path, **kwargs):
     punchcard(path, row_labels, col_labels, rows, **kwargs)
 
 if __name__ == '__main__':
-    import sys
-    args = sys.argv[1:]
-    if len(args) == 2:
-        punchcard_from_csv(args[0], args[1])
-    elif len(args) == 3:
-        punchcard_from_csv(args[0], args[1], title=args[2])
-    else:
-        print 'Usage: python punchcard.py input.csv output.png [title]'
+    parser = argparse.ArgumentParser()
+    parser.add_argument("csv", help="input csv file",
+                        type=str)
+    parser.add_argument("png",
+                        help="output png file",
+                        type=str)
+    parser.add_argument("-t", "--title", type=str)
+    args = parser.parse_args()
+
+    punchcard_from_csv(args.csv, args.png, title=args.title)
